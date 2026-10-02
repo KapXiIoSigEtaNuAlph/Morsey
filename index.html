@@ -1500,7 +1500,7 @@
 			const dotDuration = 1200 / currentWPM; // Standard WPM timing
 
 			// Timing analysis: press < 1.75 * dotDuration is evaluated as a dot, otherwise dash
-			if (pressDuration < dotDuration * 2.3) {
+			if (pressDuration < dotDuration * 3.000) {
 				transmittedMorse += '.';
 			} else {
 				transmittedMorse += '-';
