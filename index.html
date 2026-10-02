@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Morse Code Learner</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		/* Soft, muted slate palette */
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background-color: #64748b;
+			color: #0f172a;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 16px;
+			margin: 0;
+			min-height: 100vh;
+			position: relative;
+			user-select: none;
+		}
+
+		/* Landing Start Screen Overlay */
+		.start-screen-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background-color: #64748b;
+			z-index: 99999;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.start-screen-title {
+			font-size: 42px;
+			font-weight: 800;
+			color: #38bdf8;
+			margin-bottom: 28px;
+			letter-spacing: -0.5px;
+			text-align: center;
+		}
+
+		.play-game-btn {
+			width: 280px;
+			background-color: #0284c7;
+			color: #f1f5f9;
+			font-size: 18px;
+			font-weight: 700;
+			padding: 18px 0;
+			border: none;
+			cursor: pointer;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+			transition: background-color 0.2s;
+			border-radius: 8px;
+		}
+
+		.play-game-btn:hover {
+			background-color: #0369a1;
+		}
+
+		/* Top Right Tool Buttons */
+		.top-right-tools {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			z-index: 100;
+		}
+
+		.tool-btn {
+			width: 110px;
+			height: 48px;
+			border: none;
+			border-radius: 12px;
+			font-size: 13px;
+			font-weight: bold;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+			transition: transform 0.15s, opacity 0.15s, background-color 0.2s;
+			line-height: 1.2;
+		}
+
+		.tool-btn:hover {
+			transform: scale(1.04);
+			opacity: 0.95;
+		}
+
+		.btn-audio {
+			background-color: #0284c7;
+			color: #f1f5f9;
+		}
+
+		.btn-hood {
+			background-color: #475569;
+			color: #f1f5f9;
+			height: 40px;
+			width: auto;
+			padding: 0 14px;
+		}
+
+		.btn-hood.active {
+			background-color: #1e293b;
+			outline: 2px solid #38bdf8;
+		}
+
+		h1 {
+			margin: 0 0 16px 0;
+			font-size: 24px;
+			color: #f1f5f9;
+			letter-spacing: 0.5px;
+			text-align: center;
+		}
+
+		.learner-card {
+			background-color: #94a3b8;
+			border: 2px solid #475569;
+			border-radius: 36px;
+			padding: 24px;
+			display: flex;
+			flex-direction: row;
+			gap: 24px;
+			width: 100%;
+			max-width: 920px;
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+		}
+
+		.main-section {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			padding: 10px 0;
+		}
+
+		/* Mode & Direction Selectors */
+		.selector-container {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			width: 100%;
+		}
+
+		.direction-selector,
+		.mode-selector {
+			display: flex;
+			background-color: #64748b;
+			border-radius: 12px;
+			padding: 4px;
+			gap: 4px;
+			width: 100%;
+			border: 1px solid #475569;
+		}
+
+		.dir-btn,
+		.mode-btn {
+			flex: 1;
+			background: transparent;
+			color: #cbd5e1;
+			border: none;
+			padding: 8px 4px;
+			font-size: 11px;
+			font-weight: 700;
+			border-radius: 8px;
+			cursor: pointer;
+			box-shadow: none;
+			transition: all 0.2s;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.dir-btn:hover,
+		.mode-btn:hover {
+			color: #f8fafc;
+		}
+
+		.dir-btn.active,
+		.mode-btn.active {
+			background-color: #cbd5e1;
+			color: #0f172a;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.rack-banner {
+			background: #78869b;
+			color: #f1f5f9;
+			border: 1px solid #475569;
+			border-radius: 20px;
+			padding: 16px;
+			width: 100%;
+			text-align: center;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			align-items: center;
+		}
+
+		.rack-title {
+			font-size: 13px;
+			font-weight: bold;
+			letter-spacing: 1px;
+			color: #cbd5e1;
+			text-transform: uppercase;
+		}
+
+		.display-row {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 16px;
+			width: 100%;
+		}
+
+		.morse-display {
+			font-size: 44px;
+			font-weight: bold;
+			letter-spacing: 6px;
+			color: #38bdf8;
+			font-family: monospace;
+			min-height: 52px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		/* Rotary Dial Controls */
+		.dials-row {
+			display: flex;
+			justify-content: center;
+			gap: 32px;
+			width: 100%;
+			margin: 4px 0;
+		}
+
+		.dial-control {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.dial-label {
+			font-size: 11px;
+			font-weight: bold;
+			color: #cbd5e1;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.dial-knob {
+			width: 58px;
+			height: 58px;
+			background: radial-gradient(circle at 35% 35%, #475569, #1e293b);
+			border: 3px solid #38bdf8;
+			border-radius: 50%;
+			position: relative;
+			cursor: ns-resize;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+			touch-action: none;
+		}
+
+		.dial-indicator {
+			width: 4px;
+			height: 18px;
+			background-color: #38bdf8;
+			border-radius: 2px;
+			position: absolute;
+			top: 4px;
+			left: calc(50% - 2px);
+			transform-origin: 2px 23px;
+			transform: rotate(0deg);
+		}
+
+		.dial-value {
+			font-size: 12px;
+			font-weight: bold;
+			color: #f1f5f9;
+		}
+
+		.audio-play-btn {
+			background-color: #0284c7;
+			color: #f1f5f9;
+			border: none;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 13px;
+			transition: background-color 0.2s;
+		}
+
+		.audio-play-btn:hover {
+			background-color: #0369a1;
+		}
+
+		.solutions-tracker {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 8px;
+			width: 100%;
+		}
+
+		.tracker-status {
+			font-size: 14px;
+			font-weight: bold;
+			color: #cbd5e1;
+		}
+
+		.solution-slots {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+			justify-content: center;
+			max-width: 100%;
+		}
+
+		.slot-pill {
+			background-color: #78869b;
+			border: 2px dashed #475569;
+			border-radius: 8px;
+			padding: 6px 14px;
+			font-size: 18px;
+			font-weight: bold;
+			color: #cbd5e1;
+			letter-spacing: 1px;
+			min-width: 60px;
+			text-align: center;
+			transition: all 0.2s ease;
+		}
+
+		.slot-pill.found {
+			border: 2px solid #22c55e;
+			background-color: #166534;
+			color: #f0fdf4;
+		}
+
+		.slot-pill.revealed-pending {
+			border: 2px solid #f59e0b;
+			background-color: #92400e;
+			color: #fef3c7;
+			animation: pulse 1.5s infinite;
+		}
+
+		.slot-pill.skipped {
+			border: 2px solid #ef4444;
+			background-color: #991b1b;
+			color: #fee2e2;
+		}
+
+		@keyframes pulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.7; }
+		}
+
+		.input-section {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 12px;
+			width: 100%;
+			max-width: 440px;
+		}
+
+		.guess-input {
+			width: 100%;
+			padding: 12px 16px;
+			font-size: 20px;
+			font-weight: bold;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			border: 2px solid #475569;
+			border-radius: 10px;
+			text-align: center;
+			outline: none;
+			background-color: #cbd5e1;
+			color: #0f172a;
+			box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+			transition: border-color 0.2s, box-shadow 0.2s;
+		}
+
+		.guess-input:focus {
+			border-color: #38bdf8;
+			box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+		}
+
+		.guess-input.error-shake {
+			animation: shake 0.3s ease-in-out;
+			border-color: #ef4444;
+		}
+
+		@keyframes shake {
+			0%, 100% { transform: translateX(0); }
+			25% { transform: translateX(-6px); }
+			75% { transform: translateX(6px); }
+		}
+
+		/* Telegraph Key Area */
+		.transmit-area {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			width: 100%;
+		}
+
+		.transmit-display {
+			width: 100%;
+			min-height: 48px;
+			background-color: #cbd5e1;
+			border: 2px solid #475569;
+			border-radius: 10px;
+			font-size: 24px;
+			font-weight: bold;
+			font-family: monospace;
+			color: #0f172a;
+			letter-spacing: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.telegraph-key-btn {
+			width: 100%;
+			padding: 16px;
+			background: linear-gradient(to bottom, #0284c7, #0369a1);
+			color: #f1f5f9;
+			font-size: 16px;
+			font-weight: bold;
+			border: 2px solid #0284c7;
+			border-radius: 12px;
+			cursor: pointer;
+			letter-spacing: 1px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+			transition: background 0.1s, transform 0.05s;
+		}
+
+		.telegraph-key-btn:active,
+		.telegraph-key-btn.active-key {
+			background: #38bdf8;
+			color: #0f172a;
+			transform: translateY(2px);
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+		}
+
+		.btn-group {
+			display: flex;
+			gap: 8px;
+			width: 100%;
+		}
+
+		button {
+			border: none;
+			color: white;
+			padding: 12px 14px;
+			font-size: 13px;
+			font-weight: bold;
+			border-radius: 8px;
+			cursor: pointer;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			transition: all 0.2s;
+		}
+
+		button:hover {
+			transform: translateY(-2px);
+		}
+
+		.submit-btn {
+			background-color: #16a34a;
+			flex: 2;
+		}
+
+		.submit-btn:hover {
+			background-color: #15803d;
+		}
+
+		.reveal-btn {
+			background-color: #d97706;
+			flex: 1.2;
+		}
+
+		.reveal-btn:hover {
+			background-color: #b45309;
+		}
+
+		.skip-btn {
+			background-color: #475569;
+			flex: 1;
+		}
+
+		.skip-btn:hover {
+			background-color: #334155;
+		}
+
+		.guide-btn {
+			background-color: #6d28d9;
+			flex: 1.5;
+		}
+
+		.guide-btn:hover {
+			background-color: #5b21b6;
+		}
+
+		.upload-container {
+			margin-top: 4px;
+			font-size: 13px;
+			font-weight: bold;
+			color: #cbd5e1;
+			cursor: pointer;
+			text-decoration: underline;
+			transition: color 0.2s;
+		}
+
+		.upload-container:hover {
+			color: #38bdf8;
+		}
+
+		#csv-file-input {
+			display: none;
+		}
+
+		.sidebar {
+			background-color: #78869b;
+			border-radius: 24px;
+			padding: 16px;
+			width: 260px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			gap: 12px;
+			flex-shrink: 0;
+			border: 1px solid #475569;
+		}
+
+		.sidebar-title {
+			font-size: 18px;
+			font-weight: bold;
+			color: #f1f5f9;
+			text-align: center;
+			padding-bottom: 6px;
+			border-bottom: 2px solid #475569;
+		}
+
+		.history-list {
+			flex: 1;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			max-height: 320px;
+			padding-right: 4px;
+		}
+
+		.history-card {
+			background-color: #cbd5e1;
+			border-radius: 8px;
+			padding: 8px 12px;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			font-size: 12px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+			border-left: 5px solid #475569;
+		}
+
+		.history-card.correct {
+			border-left-color: #16a34a;
+		}
+
+		.history-card.assisted {
+			border-left-color: #d97706;
+		}
+
+		.history-card.incorrect {
+			border-left-color: #dc2626;
+		}
+
+		.history-word {
+			font-weight: bold;
+			font-size: 13px;
+			color: #0f172a;
+		}
+
+		.history-solutions {
+			font-size: 11px;
+			color: #334155;
+		}
+
+		.save-btn {
+			background-color: #475569;
+			color: #f1f5f9;
+			border: 1px solid #334155;
+			width: 80%;
+			margin: 0 auto;
+			text-align: center;
+			border-radius: 6px;
+			padding: 8px;
+			font-weight: bold;
+			letter-spacing: 1px;
+		}
+
+		.save-btn:hover {
+			background-color: #334155;
+		}
+
+		/* Modal Styles */
+		.modal-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background-color: rgba(15, 23, 42, 0.6);
+			backdrop-filter: blur(4px);
+			z-index: 999;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+		}
+
+		.modal-card {
+			background-color: #78869b;
+			border: 2px solid #475569;
+			border-radius: 28px;
+			width: 95vw;
+			max-width: 1100px;
+			height: 90vh;
+			max-height: 900px;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+		}
+
+		.modal-header {
+			padding: 20px 28px;
+			border-bottom: 2px solid #475569;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			background-color: #64748b;
+		}
+
+		.modal-title {
+			font-size: 24px;
+			font-weight: 800;
+			color: #38bdf8;
+		}
+
+		.modal-close-btn {
+			background: none;
+			border: none;
+			color: #cbd5e1;
+			font-size: 28px;
+			cursor: pointer;
+			padding: 0;
+			box-shadow: none;
+		}
+
+		.modal-close-btn:hover {
+			color: #f8fafc;
+			transform: none;
+		}
+
+		.modal-body {
+			padding: 28px;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			gap: 24px;
+			color: #f1f5f9;
+		}
+
+		.cheat-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+			gap: 12px;
+		}
+
+		.cheat-item {
+			background-color: #cbd5e1;
+			border: 1px solid #94a3b8;
+			border-radius: 12px;
+			padding: 12px 14px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.cheat-char {
+			font-size: 20px;
+			font-weight: 800;
+			color: #0284c7;
+		}
+
+		.cheat-code {
+			font-family: monospace;
+			font-size: 18px;
+			font-weight: bold;
+			color: #0f172a;
+			letter-spacing: 2px;
+		}
+
+		.cheat-section-title {
+			font-size: 16px;
+			font-weight: 800;
+			color: #f1f5f9;
+			text-transform: uppercase;
+			letter-spacing: 1.5px;
+			border-bottom: 2px solid #475569;
+			padding-bottom: 6px;
+		}
+
+		@media (max-width: 700px) {
+			.learner-card {
+				flex-direction: column;
+			}
+
+			.sidebar {
+				width: 100%;
+			}
+
+			.top-right-tools {
+				position: relative;
+				top: 0;
+				right: 0;
+				flex-direction: row;
+				margin-bottom: 12px;
+			}
+
+			.btn-group {
+				flex-wrap: wrap;
+			}
+
+			.cheat-grid {
+				grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+			}
+
+			.display-row {
+				flex-direction: column;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- Start Screen Overlay -->
+	<div id="start-screen-overlay" class="start-screen-overlay">
+		<div class="start-screen-title">Morse Code Learner</div>
+		<button class="play-game-btn" onclick="startGame()">Start Training</button>
+	</div>
+
+	<!-- Cheat Sheet Modal -->
+	<div id="guide-modal" class="modal-overlay" onclick="closeGuideModal(event)">
+		<div class="modal-card">
+			<div class="modal-header">
+				<div class="modal-title">Morse Code Cheat Sheet</div>
+				<button class="modal-close-btn" onclick="toggleGuideModal()">✕</button>
+			</div>
+			<div class="modal-body">
+				<div class="cheat-section-title">Letters</div>
+				<div class="cheat-grid" id="grid-letters"></div>
+
+				<div class="cheat-section-title">Numbers</div>
+				<div class="cheat-grid" id="grid-numbers"></div>
+
+				<div class="cheat-section-title">Punctuation & Special Characters</div>
+				<div class="cheat-grid" id="grid-symbols"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="top-right-tools">
+		<button class="tool-btn btn-audio" onclick="playCurrentMorse()">🔊 Play<br>Signal</button>
+	</div>
+
+	<h1>Morse Code Trainer</h1>
+
+	<div class="learner-card">
+		<div class="main-section">
+			<!-- Selector Section -->
+			<div class="selector-container">
+				<!-- Direction Selector -->
+				<div class="direction-selector">
+					<button class="dir-btn active" id="dir-symbolToLetter" onclick="setConversionDirection('symbolToLetter')">Symbol to Letter</button>
+					<button class="dir-btn" id="dir-letterToSymbol" onclick="setConversionDirection('letterToSymbol')">Letter to Symbol</button>
+				</div>
+
+				<!-- Category Mode Selector -->
+				<div class="mode-selector">
+					<button class="mode-btn active" id="mode-alphanumeric" onclick="setTrainingMode('alphanumeric')">A-Z & 0-9</button>
+					<button class="mode-btn" id="mode-symbols" onclick="setTrainingMode('symbols')">Symbols</button>
+					<button class="mode-btn" id="mode-all" onclick="setTrainingMode('all')">All Characters</button>
+				</div>
+			</div>
+
+			<div class="rack-banner">
+				<div class="rack-title" id="rack-title">Target Signal</div>
+				
+				<div class="display-row">
+					<div class="morse-display" id="morse-display">• -</div>
+					<button id="btn-hood" class="tool-btn btn-hood" onclick="toggleHoodMode()">🙈 Hood <span id="hood-status">OFF</span></button>
+				</div>
+
+				<!-- Dials Row -->
+				<div class="dials-row">
+					<div class="dial-control">
+						<span class="dial-label">Speed</span>
+						<div class="dial-knob" id="knob-speed">
+							<div class="dial-indicator" id="indicator-speed"></div>
+						</div>
+						<span class="dial-value"><span id="wpm-display">15</span> WPM</span>
+					</div>
+
+					<div class="dial-control">
+						<span class="dial-label">Pitch</span>
+						<div class="dial-knob" id="knob-pitch">
+							<div class="dial-indicator" id="indicator-pitch"></div>
+						</div>
+						<span class="dial-value"><span id="pitch-display">600</span> Hz</span>
+					</div>
+				</div>
+
+				<button class="audio-play-btn" id="btn-audio-play" onclick="playCurrentMorse()">🔊 Play Audio</button>
+			</div>
+
+			<div class="solutions-tracker">
+				<div class="tracker-status" id="tracker-status">Target Character</div>
+				<div class="solution-slots" id="solution-slots"></div>
+			</div>
+
+			<!-- Input Section for Symbol to Letter -->
+			<div class="input-section" id="input-section-text">
+				<input type="text" id="guess-input" class="guess-input" placeholder="TYPE CHARACTER" autocomplete="off" spellcheck="false" maxlength="5">
+			</div>
+
+			<!-- Keying Section for Letter to Symbol -->
+			<div class="input-section" id="input-section-transmit" style="display: none;">
+				<div class="transmit-area">
+					<div class="transmit-display" id="transmit-display"></div>
+					<button class="telegraph-key-btn" id="telegraph-key-btn">TAP / HOLD SPACEBAR TO TRANSMIT</button>
+				</div>
+			</div>
+
+			<!-- Buttons -->
+			<div class="input-section">
+				<div class="btn-group">
+					<button class="submit-btn" onclick="submitGuess()">SUBMIT</button>
+					<button class="reveal-btn" onclick="revealAnswers()">REVEAL</button>
+					<button class="skip-btn" onclick="skipTurn()">SKIP</button>
+					<button class="guide-btn" onclick="toggleGuideModal()">📖 CHEAT SHEET</button>
+				</div>
+			</div>
+
+			<label class="upload-container" for="csv-file-input">
+				UPLOAD CUSTOM SET?
+				<input type="file" id="csv-file-input" accept=".csv" onchange="handleCSVUpload(event)">
+			</label>
+		</div>
+
+		<div class="sidebar">
+			<div class="sidebar-title">Session Log</div>
+			<div class="history-list" id="history-list"></div>
+			<button class="save-btn" onclick="exportCSVProgress()">SAVE PROGRESS</button>
+		</div>
+	</div>
+
+	<script>
+		const morseMap = {
+			// Alphabet
+			'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',   'E': '.',
+			'F': '..-.',  'G': '--.',   'H': '....',  'I': '..',    'J': '.---',
+			'K': '-.-',   'L': '.-..',  'M': '--',    'N': '-.',    'O': '---',
+			'P': '.--.',  'Q': '--.-',  'R': '.-.',   'S': '...',   'T': '-',
+			'U': '..-',   'V': '...-',  'W': '.--',   'X': '-..-',  'Y': '-.--',
+			'Z': '--..',
+
+			// Numbers
+			'1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+			'6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----',
+
+			// Keyboard Punctuation & Symbols
+			'.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--',
+			'/': '-..-.',  '(': '-.--.',  ')': '-.--.-', '&': '.-...',  ':': '---...',
+			';': '-.-.-.', '=': '-...-',  '+': '.-.-.',  '-': '-....-', '_': '..--.-',
+			'"': '.-..-.', '$': '...-..-', '@': '.--.-.', '~': '.-...-', '#': '-...-.-',
+			'*': '-..-',   '%': '------', '^': '.-..-..', '<': '-.--..', '>': '-.--.-.'
+		};
+
+		let audioCtx = null;
+		let morseData = [];
+		let activeSet = [];
+		let currentItem = null;
+		let foundWordsCurrentRack = [];
+		let revealedWordsCurrentRack = [];
+		
+		// Direction & Mode State
+		let conversionDirection = 'symbolToLetter'; // 'symbolToLetter' or 'letterToSymbol'
+		let currentMode = 'alphanumeric'; // 'alphanumeric', 'symbols', 'all'
+		let isHoodMode = false;
+
+		// Dial Control Values
+		let currentWPM = 15;
+		let currentPitch = 600;
+
+		// Live Keying State
+		let transmittedMorse = '';
+		let keyPressStartTime = 0;
+		let isKeyingDown = false;
+		let activeSidetoneOsc = null;
+		let activeSidetoneGain = null;
+
+		// Per-Turn Telemetry Variables
+		let turnAudioPlays = 0;
+		let turnWasHoodActive = false;
+		let turnWasRevealed = false;
+		let turnStartTime = 0;
+
+		function initAudio() {
+			if (!audioCtx) {
+				audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			}
+			if (audioCtx.state === 'suspended') {
+				audioCtx.resume();
+			}
+		}
+
+		/* Smooth Audio Envelope Player */
+		function playTone(duration, delay) {
+			return new Promise(resolve => {
+				setTimeout(() => {
+					initAudio();
+					const now = audioCtx.currentTime;
+					const osc = audioCtx.createOscillator();
+					const gain = audioCtx.createGain();
+
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(currentPitch, now);
+					
+					// Smooth envelope ramps (5-10ms) to eliminate hardware audio clicking
+					const rampTime = 0.008; 
+					const durationSec = duration / 1000;
+
+					gain.gain.setValueAtTime(0, now);
+					gain.gain.linearRampToValueAtTime(0.15, now + rampTime);
+					gain.gain.setValueAtTime(0.15, now + durationSec - rampTime);
+					gain.gain.linearRampToValueAtTime(0, now + durationSec);
+					
+					osc.connect(gain);
+					gain.connect(audioCtx.destination);
+					
+					osc.start(now);
+					osc.stop(now + durationSec);
+
+					setTimeout(() => {
+						resolve();
+					}, duration);
+				}, delay);
+			});
+		}
+
+		/* Live Sidetone Audio Helpers for Manual Keying */
+		function startSidetone() {
+			initAudio();
+			if (activeSidetoneOsc) return;
+
+			const now = audioCtx.currentTime;
+			activeSidetoneOsc = audioCtx.createOscillator();
+			activeSidetoneGain = audioCtx.createGain();
+
+			activeSidetoneOsc.type = 'sine';
+			activeSidetoneOsc.frequency.setValueAtTime(currentPitch, now);
+
+			activeSidetoneGain.gain.setValueAtTime(0, now);
+			activeSidetoneGain.gain.linearRampToValueAtTime(0.15, now + 0.006);
+
+			activeSidetoneOsc.connect(activeSidetoneGain);
+			activeSidetoneGain.connect(audioCtx.destination);
+			activeSidetoneOsc.start(now);
+		}
+
+		function stopSidetone() {
+			if (!activeSidetoneOsc) return;
+			const now = audioCtx.currentTime;
+			activeSidetoneGain.gain.setValueAtTime(activeSidetoneGain.gain.value, now);
+			activeSidetoneGain.gain.linearRampToValueAtTime(0, now + 0.006);
+			
+			const oscToStop = activeSidetoneOsc;
+			activeSidetoneOsc = null;
+			activeSidetoneGain = null;
+
+			setTimeout(() => {
+				try { oscToStop.stop(); } catch(e) {}
+			}, 10);
+		}
+
+		async function playCurrentMorse() {
+			initAudio();
+			if (!currentItem) return;
+			
+			turnAudioPlays++;
+
+			const dotDuration = 1200 / currentWPM; // PARIS standard WPM formula
+			const code = currentItem.code;
+			
+			for (let i = 0; i < code.length; i++) {
+				const symbol = code[i];
+				if (symbol === '.') {
+					await playTone(dotDuration, 0);
+				} else if (symbol === '-') {
+					await playTone(dotDuration * 3, 0);
+				}
+				await new Promise(r => setTimeout(r, dotDuration));
+			}
+		}
+
+		function toggleHoodMode() {
+			isHoodMode = !isHoodMode;
+			const btn = document.getElementById('btn-hood');
+			const status = document.getElementById('hood-status');
+			
+			if (isHoodMode) {
+				btn.classList.add('active');
+				status.innerText = 'ON';
+			} else {
+				btn.classList.remove('active');
+				status.innerText = 'OFF';
+			}
+			updateMorseDisplay();
+		}
+
+		function updateMorseDisplay() {
+			const displayEl = document.getElementById('morse-display');
+			const titleEl = document.getElementById('rack-title');
+			const playBtn = document.getElementById('btn-audio-play');
+
+			if (!currentItem) return;
+
+			if (conversionDirection === 'symbolToLetter') {
+				titleEl.innerText = 'Target Signal';
+				playBtn.style.display = 'inline-block';
+
+				if (isHoodMode) {
+					displayEl.innerText = '🙈 [ SOUND ONLY ]';
+					displayEl.style.fontSize = '20px';
+					displayEl.style.letterSpacing = '1px';
+				} else {
+					displayEl.innerText = currentItem.code;
+					displayEl.style.fontSize = '44px';
+					displayEl.style.letterSpacing = '6px';
+				}
+			} else {
+				// Letter to Symbol mode
+				titleEl.innerText = 'Target Character';
+				playBtn.style.display = 'none';
+
+				if (isHoodMode) {
+					displayEl.innerText = '🙈 [ SOUND CUE ]';
+					displayEl.style.fontSize = '20px';
+					displayEl.style.letterSpacing = '1px';
+				} else {
+					displayEl.innerText = currentItem.character;
+					displayEl.style.fontSize = '48px';
+					displayEl.style.letterSpacing = '2px';
+				}
+			}
+		}
+
+		function setConversionDirection(dir) {
+			conversionDirection = dir;
+			document.getElementById('dir-symbolToLetter').classList.toggle('active', dir === 'symbolToLetter');
+			document.getElementById('dir-letterToSymbol').classList.toggle('active', dir === 'letterToSymbol');
+
+			if (dir === 'symbolToLetter') {
+				document.getElementById('input-section-text').style.display = 'flex';
+				document.getElementById('input-section-transmit').style.display = 'none';
+				document.getElementById('tracker-status').innerText = 'Target Character';
+			} else {
+				document.getElementById('input-section-text').style.display = 'none';
+				document.getElementById('input-section-transmit').style.display = 'flex';
+				document.getElementById('tracker-status').innerText = 'Target Morse Symbol';
+			}
+
+			nextTurn();
+		}
+
+		function setTrainingMode(mode) {
+			currentMode = mode;
+			
+			document.getElementById('mode-alphanumeric').classList.toggle('active', mode === 'alphanumeric');
+			document.getElementById('mode-symbols').classList.toggle('active', mode === 'symbols');
+			document.getElementById('mode-all').classList.toggle('active', mode === 'all');
+
+			filterActiveSet();
+			nextTurn();
+		}
+
+		function filterActiveSet() {
+			if (currentMode === 'alphanumeric') {
+				activeSet = morseData.filter(item => /[A-Z0-9]/.test(item.character));
+			} else if (currentMode === 'symbols') {
+				activeSet = morseData.filter(item => !/[A-Z0-9]/.test(item.character));
+			} else {
+				activeSet = [...morseData];
+			}
+		}
+
+		function startGame() {
+			initAudio();
+			document.getElementById('start-screen-overlay').style.display = 'none';
+			if (conversionDirection === 'symbolToLetter') {
+				document.getElementById('guess-input').focus();
+				playCurrentMorse();
+			} else {
+				if (isHoodMode) playCurrentMorse();
+			}
+		}
+
+		function toggleGuideModal() {
+			const modal = document.getElementById('guide-modal');
+			modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+		}
+
+		function closeGuideModal(event) {
+			if (event.target.id === 'guide-modal') {
+				toggleGuideModal();
+			}
+		}
+
+		function renderCheatSheet() {
+			const lettersGrid = document.getElementById('grid-letters');
+			const numbersGrid = document.getElementById('grid-numbers');
+			const symbolsGrid = document.getElementById('grid-symbols');
+
+			lettersGrid.innerHTML = '';
+			numbersGrid.innerHTML = '';
+			symbolsGrid.innerHTML = '';
+
+			Object.keys(morseMap).forEach(char => {
+				const item = morseData.find(d => d.character === char) || {};
+				const card = document.createElement('div');
+				card.className = 'cheat-item';
+
+				let subText = '';
+				if (item.audioOnlyTotal > 0) {
+					const acc = Math.round((item.audioOnlyCorrect / item.audioOnlyTotal) * 100);
+					subText = `<div style="font-size: 10px; color: #475569; text-align: left;">Blind: ${acc}%</div>`;
+				}
+
+				card.innerHTML = `
+					<div>
+						<span class="cheat-char">${char}</span>
+						${subText}
+					</div>
+					<span class="cheat-code">${morseMap[char]}</span>
+				`;
+
+				if (/[A-Z]/.test(char)) {
+					lettersGrid.appendChild(card);
+				} else if (/[0-9]/.test(char)) {
+					numbersGrid.appendChild(card);
+				} else {
+					symbolsGrid.appendChild(card);
+				}
+			});
+		}
+
+		function initLearner(customMap) {
+    const source = customMap || morseMap;
+    morseData = Object.keys(source).map(char => ({
+        character: char,
+        code: source[char],
+        weight: 10,
+        attempts: 0,
+        correct: 0,
+        streak: 0,
+        // Mode Specific Stats
+        receiveAttempts: 0,
+        receiveCorrect: 0,
+        transmitAttempts: 0,
+        transmitCorrect: 0,
+        // Timing & Audio Telemetry
+        audioOnlyCorrect: 0,
+        audioOnlyTotal: 0,
+        visualCorrect: 0,
+        visualTotal: 0,
+        revealedCount: 0,
+        totalAudioPlays: 0,
+        avgResponseTimeMs: 0,
+        avgKeyingTimingErrorMs: 0 // Difference between target dot/dash time and keypress time
+    }));
+
+    setupDials();
+    setupTelegraphKey();
+    renderCheatSheet();
+    filterActiveSet();
+    nextTurn();
+}
+
+		function getWeightedRandomItem() {
+			if (activeSet.length === 0) return morseData[0];
+			
+			const totalWeight = activeSet.reduce((sum, item) => sum + item.weight, 0);
+			let randomNum = Math.random() * totalWeight;
+
+			for (let item of activeSet) {
+				if (randomNum < item.weight) return item;
+				randomNum -= item.weight;
+			}
+			return activeSet[0];
+		}
+
+		function nextTurn() {
+			if (morseData.length === 0) return;
+
+			currentItem = getWeightedRandomItem();
+			foundWordsCurrentRack = [];
+			revealedWordsCurrentRack = [];
+			transmittedMorse = '';
+
+			turnAudioPlays = 0;
+			turnWasHoodActive = isHoodMode;
+			turnWasRevealed = false;
+			turnStartTime = Date.now();
+
+			updateMorseDisplay();
+			renderSolutionTracker();
+			updateTransmitDisplay();
+
+			document.getElementById('guess-input').value = '';
+			
+			if (document.getElementById('start-screen-overlay').style.display === 'none') {
+				if (conversionDirection === 'symbolToLetter') {
+					document.getElementById('guess-input').focus();
+					playCurrentMorse();
+				} else {
+					if (isHoodMode) playCurrentMorse();
+				}
+			}
+		}
+
+		function renderSolutionTracker() {
+			const slotsEl = document.getElementById('solution-slots');
+			slotsEl.innerHTML = '';
+
+			const pill = document.createElement('div');
+			const targetVal = conversionDirection === 'symbolToLetter' ? currentItem.character : currentItem.code;
+
+			if (foundWordsCurrentRack.includes(targetVal)) {
+				pill.className = 'slot-pill found';
+				pill.innerText = targetVal;
+			} else if (revealedWordsCurrentRack.includes(targetVal)) {
+				pill.className = 'slot-pill revealed-pending';
+				pill.innerText = targetVal;
+			} else {
+				pill.className = 'slot-pill';
+				pill.innerText = '?';
+			}
+			slotsEl.appendChild(pill);
+		}
+
+		function updateTransmitDisplay() {
+			document.getElementById('transmit-display').innerText = transmittedMorse || '• -';
+		}
+
+		function submitGuess() {
+    const inputEl = document.getElementById('guess-input');
+    let guess = conversionDirection === 'symbolToLetter' ? inputEl.value.trim().toUpperCase() : transmittedMorse.trim();
+
+    if (!guess) return;
+
+    const latency = Date.now() - turnStartTime;
+    const targetVal = conversionDirection === 'symbolToLetter' ? currentItem.character : currentItem.code;
+
+    currentItem.attempts++;
+    currentItem.totalAudioPlays += turnAudioPlays;
+    currentItem.avgResponseTimeMs = currentItem.avgResponseTimeMs === 0 
+        ? latency 
+        : Math.round((currentItem.avgResponseTimeMs * (currentItem.attempts - 1) + latency) / currentItem.attempts);
+
+    if (conversionDirection === 'symbolToLetter') {
+        currentItem.receiveAttempts++;
+    } else {
+        currentItem.transmitAttempts++;
+    }
+
+    if (guess === targetVal) {
+        foundWordsCurrentRack.push(targetVal);
+        if (conversionDirection === 'symbolToLetter') inputEl.value = '';
+        renderSolutionTracker();
+
+        if (conversionDirection === 'symbolToLetter') {
+            currentItem.receiveCorrect++;
+        } else {
+            currentItem.transmitCorrect++;
+        }
+
+        if (turnWasHoodActive) {
+            currentItem.audioOnlyTotal++;
+        } else {
+            currentItem.visualTotal++;
+        }
+
+        if (turnWasRevealed) {
+            currentItem.revealedCount++;
+            currentItem.streak = 0;
+            currentItem.weight += 4;
+            addHistoryEntry('assisted', `${currentItem.character} [${currentItem.code}] (Revealed)`, [targetVal]);
+        } else {
+            currentItem.correct++;
+            let reduction = turnWasHoodActive ? ((turnAudioPlays <= 1 && latency < 3500) ? 5 : 3) : 2;
+
+            if (turnWasHoodActive) currentItem.audioOnlyCorrect++;
+            else currentItem.visualCorrect++;
+
+            currentItem.streak++;
+            currentItem.weight = Math.max(1, currentItem.weight - reduction);
+            addHistoryEntry('correct', `${currentItem.character} [${currentItem.code}]`, [targetVal]);
+        }
+
+        renderCheatSheet();
+        setTimeout(nextTurn, 400);
+    } else {
+        if (conversionDirection === 'symbolToLetter') {
+            triggerInputError(inputEl);
+        } else {
+            triggerInputError(document.getElementById('transmit-display'));
+            transmittedMorse = '';
+            updateTransmitDisplay();
+        }
+    }
+}
+
+		function revealAnswers() {
+			turnWasRevealed = true;
+			const targetVal = conversionDirection === 'symbolToLetter' ? currentItem.character : currentItem.code;
+			if (!revealedWordsCurrentRack.includes(targetVal)) {
+				revealedWordsCurrentRack.push(targetVal);
+			}
+			renderSolutionTracker();
+			if (conversionDirection === 'symbolToLetter') {
+				document.getElementById('guess-input').focus();
+			}
+		}
+
+		function skipTurn() {
+			const latency = Date.now() - turnStartTime;
+
+			currentItem.attempts++;
+			currentItem.totalAudioPlays += turnAudioPlays;
+			currentItem.avgResponseTimeMs = currentItem.avgResponseTimeMs === 0 
+				? latency 
+				: Math.round((currentItem.avgResponseTimeMs * (currentItem.attempts - 1) + latency) / currentItem.attempts);
+
+			if (turnWasHoodActive) {
+				currentItem.audioOnlyTotal++;
+			} else {
+				currentItem.visualTotal++;
+			}
+
+			currentItem.streak = 0;
+			currentItem.weight += 10;
+
+			const slotsEl = document.getElementById('solution-slots');
+			slotsEl.innerHTML = '';
+			const pill = document.createElement('div');
+			pill.className = 'slot-pill skipped';
+			pill.innerText = conversionDirection === 'symbolToLetter' ? currentItem.character : currentItem.code;
+			slotsEl.appendChild(pill);
+
+			addHistoryEntry('incorrect', `SKIPPED (${currentItem.character} = ${currentItem.code})`, [currentItem.character]);
+
+			renderCheatSheet();
+			setTimeout(nextTurn, 1000);
+		}
+
+		function triggerInputError(el) {
+			el.classList.add('error-shake');
+			setTimeout(() => el.classList.remove('error-shake'), 350);
+		}
+
+		function addHistoryEntry(type, userText, validSolutions) {
+			const historyList = document.getElementById('history-list');
+			const card = document.createElement('div');
+			card.className = `history-card ${type}`;
+
+			const wordText = document.createElement('div');
+			wordText.className = 'history-word';
+			
+			let symbol = '✓';
+			if (type === 'assisted') symbol = '👁';
+			if (type === 'incorrect') symbol = '✗';
+
+			wordText.innerText = `${symbol} ${userText}`;
+
+			const solText = document.createElement('div');
+			solText.className = 'history-solutions';
+			solText.innerText = `Target: ${validSolutions.join(', ')}`;
+
+			card.appendChild(wordText);
+			card.appendChild(solText);
+			historyList.prepend(card);
+		}
+
+		/* Keyboard Handling (Spacebar replay & Transmission) */
+		document.addEventListener('keydown', function (e) {
+			if (e.repeat) return;
+
+			if (conversionDirection === 'symbolToLetter') {
+				// Symbol -> Letter: Spacebar replays audio sound without disturbing input
+				if (e.code === 'Space' && document.activeElement === document.getElementById('guess-input')) {
+					e.preventDefault();
+					playCurrentMorse();
+				} else if (e.key === 'Enter') {
+					e.preventDefault();
+					submitGuess();
+				}
+			} else {
+				// Letter -> Symbol: Spacebar transmits Morse signal
+				if (e.code === 'Space') {
+					e.preventDefault();
+					onKeyStart();
+				} else if (e.key === 'Enter') {
+					e.preventDefault();
+					submitGuess();
+				} else if (e.key === 'Backspace') {
+					e.preventDefault();
+					transmittedMorse = transmittedMorse.slice(0, -1);
+					updateTransmitDisplay();
+				}
+			}
+		});
+
+		document.addEventListener('keyup', function (e) {
+			if (conversionDirection === 'letterToSymbol' && e.code === 'Space') {
+				e.preventDefault();
+				onKeyEnd();
+			}
+		});
+
+		/* Telegraph Key Press Logic */
+		function setupTelegraphKey() {
+			const keyBtn = document.getElementById('telegraph-key-btn');
+
+			const startKey = (e) => {
+				e.preventDefault();
+				onKeyStart();
+			};
+
+			const endKey = (e) => {
+				e.preventDefault();
+				onKeyEnd();
+			};
+
+			keyBtn.addEventListener('mousedown', startKey);
+			keyBtn.addEventListener('mouseup', endKey);
+			keyBtn.addEventListener('mouseleave', endKey);
+			keyBtn.addEventListener('touchstart', startKey);
+			keyBtn.addEventListener('touchend', endKey);
+		}
+
+		function onKeyStart() {
+			if (isKeyingDown) return;
+			isKeyingDown = true;
+			keyPressStartTime = Date.now();
+			document.getElementById('telegraph-key-btn').classList.add('active-key');
+			startSidetone();
+		}
+
+		function onKeyEnd() {
+			if (!isKeyingDown) return;
+			isKeyingDown = false;
+			document.getElementById('telegraph-key-btn').classList.remove('active-key');
+			stopSidetone();
+
+			const pressDuration = Date.now() - keyPressStartTime;
+			const dotDuration = 1200 / currentWPM; // Standard WPM timing
+
+			// Timing analysis: press < 1.75 * dotDuration is evaluated as a dot, otherwise dash
+			if (pressDuration < dotDuration * 2.3) {
+				transmittedMorse += '.';
+			} else {
+				transmittedMorse += '-';
+			}
+
+			updateTransmitDisplay();
+		}
+
+		/* Custom Dial Control Logic */
+		function setupDials() {
+			initDial('knob-speed', 'indicator-speed', 'wpm-display', 5, 30, currentWPM, (val) => {
+				currentWPM = Math.round(val);
+				document.getElementById('wpm-display').innerText = currentWPM;
+			});
+
+			initDial('knob-pitch', 'indicator-pitch', 'pitch-display', 400, 800, currentPitch, (val) => {
+				currentPitch = Math.round(val);
+				document.getElementById('pitch-display').innerText = currentPitch;
+			});
+		}
+
+		function initDial(knobId, indicatorId, displayId, minVal, maxVal, initialVal, onChange) {
+			const knob = document.getElementById(knobId);
+			const indicator = document.getElementById(indicatorId);
+			
+			let currentVal = initialVal;
+
+			function updateVisual(val) {
+				const pct = (val - minVal) / (maxVal - minVal);
+				const angle = -135 + (pct * 270); // 270 degree rotational arc
+				indicator.style.transform = `rotate(${angle}deg)`;
+			}
+
+			updateVisual(currentVal);
+
+			let isDragging = false;
+			let startY = 0;
+			let startVal = 0;
+
+			const onStart = (clientY) => {
+				isDragging = true;
+				startY = clientY;
+				startVal = currentVal;
+			};
+
+			const onMove = (clientY) => {
+				if (!isDragging) return;
+				const deltaY = startY - clientY;
+				const range = maxVal - minVal;
+				let newVal = startVal + (deltaY * (range / 150));
+				newVal = Math.max(minVal, Math.min(maxVal, newVal));
+				currentVal = newVal;
+				updateVisual(currentVal);
+				onChange(currentVal);
+			};
+
+			const onEnd = () => {
+				isDragging = false;
+			};
+
+			knob.addEventListener('mousedown', (e) => onStart(e.clientY));
+			window.addEventListener('mousemove', (e) => onMove(e.clientY));
+			window.addEventListener('mouseup', onEnd);
+
+			knob.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY));
+			window.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY));
+			window.addEventListener('touchend', onEnd);
+		}
+
+		/* Data Export & CSV Handling */
+		function exportCSVProgress() {
+    let csvContent = "data:text/csv;charset=utf-8,Character,Code,Weight,Attempts,Correct,Streak,ReceiveAttempts,ReceiveCorrect,TransmitAttempts,TransmitCorrect,AudioOnlyCorrect,AudioOnlyTotal,VisualCorrect,VisualTotal,RevealedCount,TotalAudioPlays,AvgResponseTimeMs,ConfigWPM,ConfigPitchHz\n";
+    
+    morseData.forEach(item => {
+        csvContent += `"${item.character}",${item.code},${item.weight},${item.attempts},${item.correct},${item.streak},${item.receiveAttempts},${item.receiveCorrect},${item.transmitAttempts},${item.transmitCorrect},${item.audioOnlyCorrect},${item.audioOnlyTotal},${item.visualCorrect},${item.visualTotal},${item.revealedCount},${item.totalAudioPlays},${item.avgResponseTimeMs},${currentWPM},${currentPitch}\n`;
+    });
+
+
+
+			const encodedUri = encodeURI(csvContent);
+			const link = document.createElement("a");
+			link.setAttribute("href", encodedUri);
+			link.setAttribute("download", "morse_learning_telemetry.csv");
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+
+		function handleCSVUpload(event) {
+			const file = event.target.files[0];
+			if (!file) return;
+
+			const reader = new FileReader();
+			reader.onload = function (e) {
+				const content = e.target.result;
+				const lines = content.split(/\r\n|\n/);
+
+				if (lines[0].includes('Character') && lines[0].includes('Code')) {
+					morseData = [];
+					for (let i = 1; i < lines.length; i++) {
+						if (!lines[i].trim()) continue;
+						const parts = lines[i].split(',');
+						if (parts.length >= 6) {
+							morseData.push({
+								character: parts[0].replace(/"/g, '').trim(),
+								code: parts[1].trim(),
+								weight: parseInt(parts[2]) || 10,
+								attempts: parseInt(parts[3]) || 0,
+								correct: parseInt(parts[4]) || 0,
+								streak: parseInt(parts[5]) || 0,
+								audioOnlyCorrect: parts[6] ? parseInt(parts[6]) || 0 : 0,
+								audioOnlyTotal: parts[7] ? parseInt(parts[7]) || 0 : 0,
+								visualCorrect: parts[8] ? parseInt(parts[8]) || 0 : 0,
+								visualTotal: parts[9] ? parseInt(parts[9]) || 0 : 0,
+								revealedCount: parts[10] ? parseInt(parts[10]) || 0 : 0,
+								totalAudioPlays: parts[11] ? parseInt(parts[11]) || 0 : 0,
+								avgResponseTimeMs: parts[12] ? parseInt(parts[12]) || 0 : 0
+							});
+						}
+					}
+					renderCheatSheet();
+					filterActiveSet();
+					nextTurn();
+				}
+			};
+			reader.readAsText(file);
+		}
+
+		initLearner();
+	</script>
+</body>
+
+</html>
